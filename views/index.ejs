@@ -1,0 +1,98 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <div class="app-header">
+    <h1>My Todo List</h1>
+    <p class="subtitle">Stay organized. Get things done.</p>
+  </div>
+
+  <!-- Add Todo Form -->
+  <div class="add-card">
+    <h2>Add New Task</h2>
+    <form action="/" method="POST" class="add-form">
+      <div class="form-row">
+        <input type="text" name="title" placeholder="What needs to be done?" required class="input-main" autocomplete="off">
+        <button type="submit" class="btn-add">Add</button>
+      </div>
+      <div class="form-row form-extras">
+        <input type="text" name="description" placeholder="Description (optional)" class="input-desc">
+        <select name="priority" class="select-priority">
+          <option value="low">🟢 Low</option>
+          <option value="medium" selected>🟡 Medium</option>
+          <option value="high">🔴 High</option>
+        </select>
+        <input type="date" name="dueDate" class="input-date">
+      </div>
+    </form>
+  </div>
+
+  <!-- Stats Bar -->
+  <div class="stats-bar">
+    <span class="stat"><strong><%= totalCount %></strong> Total</span>
+    <span class="stat active"><strong><%= activeCount %></strong> Active</span>
+    <span class="stat done"><strong><%= completedCount %></strong> Done</span>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-tabs">
+    <a href="/?filter=all" class="tab <%= filter === 'all' ? 'active' : '' %>">All</a>
+    <a href="/?filter=active" class="tab <%= filter === 'active' ? 'active' : '' %>">Active</a>
+    <a href="/?filter=completed" class="tab <%= filter === 'completed' ? 'active' : '' %>">Completed</a>
+
+    <% if (completedCount > 0) { %>
+    <form action="/?_method=DELETE" method="POST" style="margin-left:auto">
+      <button type="submit" class="btn-clear" onclick="return confirm('Clear all completed tasks?')">
+        🗑 Clear Completed
+      </button>
+    </form>
+    <% } %>
+  </div>
+
+  <!-- Todo List -->
+  <div class="todo-list">
+    <% if (todos.length === 0) { %>
+    <div class="empty-state">
+      <div class="empty-icon">🎉</div>
+      <p><% if (filter === 'completed') { %>No completed tasks yet.<% } else if (filter === 'active') { %>All tasks completed! Great job.<% } else { %>No tasks yet. Add one above!<% } %></p>
+    </div>
+    <% } %>
+
+    <% todos.forEach(todo => { %>
+    <div class="todo-item <%= todo.completed ? 'completed' : '' %> priority-<%= todo.priority %>">
+      <div class="todo-left">
+        <!-- Toggle complete -->
+        <form action="/<%= todo._id %>/toggle?_method=PATCH" method="POST">
+          <button type="submit" class="toggle-btn">
+            <%= todo.completed ? '✅' : '⬜' %>
+          </button>
+        </form>
+        <div class="todo-info">
+          <span class="todo-title"><%= todo.title %></span>
+          <% if (todo.description) { %>
+          <span class="todo-desc"><%= todo.description %></span>
+          <% } %>
+          <div class="todo-meta">
+            <span class="badge priority-badge-<%= todo.priority %>">
+              <%= todo.priority === 'high' ? '🔴' : todo.priority === 'medium' ? '🟡' : '🟢' %> <%= todo.priority %>
+            </span>
+            <% if (todo.dueDate) { %>
+            <span class="due-date <%= new Date(todo.dueDate) < new Date() && !todo.completed ? 'overdue' : '' %>">
+              📅 <%= new Date(todo.dueDate).toLocaleDateString('en-PK', { day:'numeric', month:'short', year:'numeric' }) %>
+            </span>
+            <% } %>
+            <span class="created-at">Added <%= new Date(todo.createdAt).toLocaleDateString() %></span>
+          </div>
+        </div>
+      </div>
+      <div class="todo-actions">
+        <a href="/<%= todo._id %>/edit" class="btn-icon" title="Edit">✏️</a>
+        <form action="/<%= todo._id %>?_method=DELETE" method="POST" style="display:inline">
+          <button type="submit" class="btn-icon" title="Delete" onclick="return confirm('Delete this task?')">🗑️</button>
+        </form>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
