@@ -8,7 +8,7 @@ const path = require('path');
 const app = express();
 
 // Use PORT from .env or default
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // ✅ Connect to MongoDB Atlas
 mongoose.connect(process.env.MONGODB_URI, {
